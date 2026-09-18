@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cifra de César (v2) | Visualizador com Tabela de Símbolos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.3/lib/p5.min.js"></script>
+  </head>
+  <body>
+    <main class="page-shell">
+      <nav class="nav-links" aria-label="Navegação entre aplicações">
+          <a href="/" class="nav-back" style="margin-bottom:0;">← Voltar</a>
+      </nav>
+
+      <header>
+        <p class="eyebrow">Criptografia Modular ℤ₄₈</p>
+        <h1>Cifra de César</h1>
+        <p class="intro">
+          Anel interno: Texto plano. Anel externo: Texto criptografado transladado por rotação modular.
+          Agora com a <strong>Tabela de Códigos</strong> analítica com todos os 48 símbolos e mapeamento em tempo real.
+        </p>
+      </header>
+
+      <section class="app-card" aria-label="Demonstração interativa da Cifra de César com tabela de símbolos">
+        <!-- Visual display column -->
+        <div class="visual-column">
+          <div class="visual-toolbar">
+            <div class="view-tabs" role="tablist" aria-label="Modos de visualização">
+              <button id="tabWheel" class="tab-btn active" type="button" role="tab" aria-selected="true">
+                🎡 Disco Cifrador
+              </button>
+              <button id="tabTable" class="tab-btn" type="button" role="tab" aria-selected="false">
+                📋 Tabela de Códigos (48)
+              </button>
+            </div>
+            <div class="visual-info-chip">
+              Chave: <strong id="chipKey">03</strong> | Mapeamento: <strong id="chipShift">A ➔ D</strong>
+            </div>
+          </div>
+
+          <!-- P5.js Cipher Wheel -->
+          <div id="wheel-holder" aria-label="Visualização gráfica do disco giratório da Cifra de César"></div>
+
+          <!-- Symbol Table View -->
+          <div id="symbolTableHolder" class="symbol-table-holder" style="display:none;" aria-label="Tabela analítica dos 48 símbolos">
+            <div class="table-toolbar">
+              <div class="table-toolbar-top">
+                <div class="table-legend-pills">
+                  <span class="legend-pill">
+                    <span class="legend-pill-color in"></span>
+                    <span>Texto Plano (Entrada)</span>
+                  </span>
+                  <span class="legend-pill">
+                    <span class="legend-pill-color out"></span>
+                    <span>Texto Cifrado (Saída)</span>
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  id="symSearch"
+                  class="table-search"
+                  placeholder="Buscar símbolo ou código..."
+                  aria-label="Buscar símbolo ou código"
+                />
+              </div>
+              <div class="table-filters">
+                <button type="button" class="filter-btn active" data-filter="all">Todos (48)</button>
+                <button type="button" class="filter-btn" data-filter="letter">Letras A–Z (26)</button>
+                <button type="button" class="filter-btn" data-filter="punct">Pontuação (12)</button>
+                <button type="button" class="filter-btn" data-filter="digit">Dígitos 0–9 (10)</button>
+              </div>
+            </div>
+            <div class="symbol-grid" id="symbolGrid" aria-label="Grade de 48 cartões com códigos dos símbolos e translação">
+              <!-- Dynamically populated symbol cards -->
+            </div>
+            <div class="table-help-note">
+              💡 Dica: Cada cartão exibe o mapeamento atual sob a chave <strong>k</strong>. Clique em qualquer símbolo para inseri-lo na mensagem.
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls column -->
+        <aside class="controls">
+          <div class="key-readout">
+            <span>Chave k</span>
+            <strong id="keyNumber">03</strong>
+          </div>
+
+          <div class="math-formula-box">
+            <span>Fórmula:</span>
+            <strong id="formulaReadout">C ≡ (P + 03) mod 48</strong>
+          </div>
+
+          <label for="key">Chave / Rotação (0 a 47)</label>
+          <input id="key" type="range" min="0" max="47" value="3" />
+          <div class="range-labels"><span>0</span><span>47</span></div>
+
+          <label class="switch-row" for="mode">
+            <input id="mode" type="checkbox" />
+            <span class="switch" aria-hidden="true"></span>
+            <span>
+              <b id="modeName">Cifrar</b>
+              <small id="modeHint">Sentido horário (somar k)</small>
+            </span>
+          </label>
+
+          <label for="message">Sua Mensagem</label>
+          <textarea id="message" maxlength="160" spellcheck="false" placeholder="DIGITE UMA MENSAGEM...">OLA, MUNDO! 1929</textarea>
+
+          <div class="quick-texts">
+            <span>Exemplos:</span>
+            <button type="button" class="btn-small" data-msg="OLA, MUNDO! 1929">OLA, MUNDO!</button>
+            <button type="button" class="btn-small" data-msg="CESAR: 48">CESAR: 48</button>
+            <button type="button" class="btn-small" data-msg="RETRO-CYPHER">RETRO</button>
+            <button type="button" class="btn-small" data-msg="VENI, VIDI, VICI.">VENI, VIDI</button>
+          </div>
+
+          <div class="result-block">
+            <span class="result-label" id="resultLabel">Mensagem Cifrada</span>
+            <output id="result" aria-live="polite">—</output>
+            <div class="char-mapping-summary" id="charMappingSummary">
+              Último caractere: <strong>'9' (47) ➔ 'C' (02)</strong>
+            </div>
+          </div>
+          <p class="note">Caracteres permitidos: A–Z, números (0–9), espaço e . , ? ! : ; - ' &quot; ( ) (Total: 48 símbolos no anel ℤ₄₈).</p>
+        </aside>
+      </section>
+
+      <footer>
+        <div>
+          <span class="dot"></span>
+          O anel interno permanece fixo. O anel externo é o alfabeto transladado modularmente por k posições em ℤ₄₈.
+        </div>
+        <div>
+          <a href="../hill/index.html" style="color:var(--ink); text-decoration:underline;">Ver Cifra de Hill (Álgebra Linear) →</a>
+        </div>
+      </footer>
+    </main>
+
+    <script src="sketch.js"></script>
+  </body>
+</html>

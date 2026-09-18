@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checksum do CPF | Visualizador de Somas Ponderadas e Aritmética Modular ℤ₁₁</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  </head>
+  <body>
+    <main class="page-shell">
+      <nav class="nav-links" aria-label="Navegação entre aplicações">
+          <a href="/" class="nav-back" style="margin-bottom:0;">← Voltar</a>
+      </nav>
+
+      <header>
+        <p class="eyebrow">Aritmética Modular ℤ₁₁ &amp; Códigos Detectores de Erros</p>
+        <h1>Dígitos Verificadores do CPF</h1>
+        <p class="intro">
+          O Cadastro de Pessoas Físicas (CPF) utiliza um algoritmo de <strong>soma ponderada decrescente</strong> no anel modular
+          <strong>ℤ₁₁</strong> para gerar dois dígitos verificadores (<strong>DV₁</strong> e <strong>DV₂</strong>).
+          Digite os dígitos abaixo para acompanhar as multiplicações escalares, as somas parciais e a redução modular em tempo real.
+        </p>
+      </header>
+
+      <section class="app-card" aria-label="Demonstração interativa do Checksum do CPF">
+        <!-- Input section -->
+        <div class="cpf-input-section">
+          <div class="section-label">
+            <span>Preencha os Dígitos do CPF (ou cole 11 números)</span>
+            <span style="font-size:0.7rem; color:#8c8273;">D₉ = Região Fiscal • D₁₀ = DV₁ • D₁₁ = DV₂</span>
+          </div>
+
+          <div class="cpf-digits-row" id="cpfInputsContainer">
+            <!-- Digits 1 to 3 -->
+            <div class="digit-box-wrap">
+              <span class="digit-pos-label">d₁</span>
+              <input type="text" maxlength="1" inputmode="numeric" class="digit-input" data-index="0" value="1" aria-label="Dígito 1" />
+            </div>
+            <div class="digit-box-wrap">
+              <span class="digit-pos-label">d₂</span>
+              <input type="text" maxlength="1" inputmode="numeric" class="digit-input" data-index="1" value="2" aria-label="Dígito 2" />
+            </div>
+            <div class="digit-box-wrap">
+              <span class="digit-pos-label">d₃</span>
+              <input type="text" maxlength="1" inputmode="numeric" class="digit-input" data-index="2" value="3" aria-label="Dígito 3" />
+            </div>
+
+            <span class="digit-separator">.</span>
+
+            <!-- Digits 4 to 6 -->
+            <div class="digit-box-wrap">
+              <span class="digit-pos-label">d₄</span>
+              <input type="text" maxlength="1" inputmode="numeric" class="digit-input" data-index="3" value="4" aria-label="Dígito 4" />
+            </div>
+            <div class="digit-box-wrap">
+              <span class="digit-pos-label">d₅</span>
+              <input type="text" maxlength="1" inputmode="numeric" class="digit-input" data-index="4" value="5" aria-label="Dígito 5" />
+            </div>
+            <div class="digit-box-wrap">
+              <span class="digit-pos-label">d₆</span>
+              <input type="text" maxlength="1" inputmode="numeric" class="digit-input" data-index="5" value="6" aria-label="Dígito 6" />
+            </div>
+
+            <span class="digit-separator">.</span>
+
+            <!-- Digits 7 to 9 -->
+            <div class="digit-box-wrap">
+              <span class="digit-pos-label">d₇</span>
+              <input type="text" maxlength="1" inputmode="numeric" class="digit-input" data-index="6" value="7" aria-label="Dígito 7" />
+            </div>
+            <div class="digit-box-wrap">
+              <span class="digit-pos-label">d₈</span>
+              <input type="text" maxlength="1" inputmode="numeric" class="digit-input" data-index="7" value="8" aria-label="Dígito 8" />
+            </div>
+            <div class="digit-box-wrap" title="O 9º dígito identifica a Região Fiscal">
+              <span class="digit-pos-label" style="color:#8d5b25; font-weight:700;">d₉ (Região)</span>
+              <input type="text" maxlength="1" inputmode="numeric" class="digit-input region-digit" data-index="8" value="9" aria-label="Dígito 9 (Região Fiscal)" />
+            </div>
+
+            <span class="digit-separator">-</span>
+
+            <!-- DV1 and DV2 -->
+            <div class="digit-box-wrap" title="Primeiro Dígito Verificador (DV1)">
+              <span class="digit-pos-label" style="color:var(--teal-dark); font-weight:700;">d₁₀ (DV₁)</span>
+              <input type="text" maxlength="1" inputmode="numeric" class="digit-input dv-input" data-index="9" value="0" aria-label="Dígito 10 (DV1)" />
+            </div>
+            <div class="digit-box-wrap" title="Segundo Dígito Verificador (DV2)">
+              <span class="digit-pos-label" style="color:var(--blue); font-weight:700;">d₁₁ (DV₂)</span>
+              <input type="text" maxlength="1" inputmode="numeric" class="digit-input dv2-input" data-index="10" value="9" aria-label="Dígito 11 (DV2)" />
+            </div>
+          </div>
+
+          <!-- Controls Bar -->
+          <div class="input-controls-bar">
+            <div class="btn-group">
+              <button type="button" class="btn primary" id="btnCalcDVs">⚡ Calcular DV₁ e DV₂</button>
+              <button type="button" class="btn" id="btnRandomCpf">🎲 Gerar CPF Válido</button>
+              <button type="button" class="btn" id="btnClearCpf">🧹 Limpar</button>
+            </div>
+
+            <div class="btn-group">
+              <span style="font-size:0.72rem; color:#68716c; align-self:center; margin-right:4px;">Exemplos Didáticos:</span>
+              <button type="button" class="btn" data-preset="12345678909">123.456.789-09</button>
+              <button type="button" class="btn" data-preset="11144477735">111.444.777-35 (RS)</button>
+              <button type="button" class="btn" data-preset="52998224725">529.982.247-25 (RJ)</button>
+              <button type="button" class="btn" data-preset="11111111111" title="Passa no checksum clássico, mas rejeitado por dígitos repetidos">111.111.111-11</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status & Fiscal Region Banner -->
+        <div class="status-banner" id="statusBanner">
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <span class="status-badge" id="validationBadge">Verificando...</span>
+            <span id="validationMessage" style="font-size:0.83rem; color:#3b4742;">—</span>
+          </div>
+          <div class="region-info" id="regionInfo">
+            <span>Região Fiscal (D₉):</span>
+            <span class="region-chip" id="regionName">—</span>
+          </div>
+        </div>
+
+        <!-- Real-time Weighted Sum Columns -->
+        <div class="dv-grid">
+          <!-- DV1 Card -->
+          <div class="dv-card dv1">
+            <div class="dv-header">
+              <div>
+                <span class="dv-pill">Primeiro Dígito</span>
+                <h2 class="dv-title" style="margin-top:6px;">Cálculo do DV₁</h2>
+              </div>
+              <span style="font-size:0.72rem; color:#68716c;">Pesos: 10 ➔ 2</span>
+            </div>
+
+            <div class="calc-table-wrap">
+              <table class="calc-table" aria-label="Tabela de soma ponderada para DV1">
+                <thead>
+                  <tr>
+                    <th>Pos</th>
+                    <th>1</th>
+                    <th>2</th>
+                    <th>3</th>
+                    <th>4</th>
+                    <th>5</th>
+                    <th>6</th>
+                    <th>7</th>
+                    <th>8</th>
+                    <th>9</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="row-digits" id="dv1RowDigits">
+                    <td style="font-size:0.65rem; font-family:'DM Mono'; color:#8c8273;">Dígito</td>
+                    <td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
+                  </tr>
+                  <tr class="row-weights">
+                    <td style="font-size:0.65rem; color:#8c8273;">Peso</td>
+                    <td>10</td><td>9</td><td>8</td><td>7</td><td>6</td><td>5</td><td>4</td><td>3</td><td>2</td>
+                  </tr>
+                  <tr class="row-products" id="dv1RowProducts">
+                    <td style="font-size:0.65rem; color:#8c8273;">d × p</td>
+                    <td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="arithmetic-flow">
+              <div><strong>1. Expressão da Soma Ponderada (S₁):</strong></div>
+              <div class="math-formula" id="dv1FormulaText">S₁ = ...</div>
+
+              <div class="math-step">
+                <span>Valor Total de S₁:</span>
+                <strong id="dv1SumVal">0</strong>
+              </div>
+              <div class="math-step">
+                <span>Divisão Euclidiana (S₁ ÷ 11):</span>
+                <span id="dv1DivStep">0 = 11 × 0 + resto 0</span>
+              </div>
+              <div class="math-step">
+                <span>Resto da Divisão (R₁ = S₁ mod 11):</span>
+                <strong id="dv1RestoVal" style="color:var(--orange-dark);">0</strong>
+              </div>
+              <div class="math-step">
+                <span>Regra do Algoritmo:</span>
+                <span id="dv1RuleText">Se R₁ &lt; 2 ➔ DV₁ = 0; senão ➔ 11 - R₁</span>
+              </div>
+
+              <div class="result-dv-box">
+                <div>
+                  <span style="font-size:0.72rem; text-transform:uppercase; color:#68716c; display:block;">DV₁ Calculado</span>
+                  <span style="font-size:0.78rem;" id="dv1Comparison">Esperado pelo cálculo</span>
+                </div>
+                <span class="result-dv-val" id="dv1FinalVal">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- DV2 Card -->
+          <div class="dv-card dv2">
+            <div class="dv-header">
+              <div>
+                <span class="dv-pill">Segundo Dígito</span>
+                <h2 class="dv-title" style="margin-top:6px;">Cálculo do DV₂</h2>
+              </div>
+              <span style="font-size:0.72rem; color:#68716c;">Pesos: 11 ➔ 2 (inclui DV₁)</span>
+            </div>
+
+            <div class="calc-table-wrap">
+              <table class="calc-table" aria-label="Tabela de soma ponderada para DV2">
+                <thead>
+                  <tr>
+                    <th>Pos</th>
+                    <th>1</th>
+                    <th>2</th>
+                    <th>3</th>
+                    <th>4</th>
+                    <th>5</th>
+                    <th>6</th>
+                    <th>7</th>
+                    <th>8</th>
+                    <th>9</th>
+                    <th style="background:#e8f1f8; color:var(--blue); font-weight:700;">10</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="row-digits" id="dv2RowDigits">
+                    <td style="font-size:0.65rem; font-family:'DM Mono'; color:#8c8273;">Dígito</td>
+                    <td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="highlight-dv">—</td>
+                  </tr>
+                  <tr class="row-weights">
+                    <td style="font-size:0.65rem; color:#8c8273;">Peso</td>
+                    <td>11</td><td>10</td><td>9</td><td>8</td><td>7</td><td>6</td><td>5</td><td>4</td><td>3</td><td style="font-weight:700;">2</td>
+                  </tr>
+                  <tr class="row-products dv2" id="dv2RowProducts">
+                    <td style="font-size:0.65rem; color:#8c8273;">d × p</td>
+                    <td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="arithmetic-flow">
+              <div><strong>1. Expressão da Soma Ponderada (S₂):</strong></div>
+              <div class="math-formula" id="dv2FormulaText">S₂ = ...</div>
+
+              <div class="math-step">
+                <span>Valor Total de S₂:</span>
+                <strong id="dv2SumVal">0</strong>
+              </div>
+              <div class="math-step">
+                <span>Divisão Euclidiana (S₂ ÷ 11):</span>
+                <span id="dv2DivStep">0 = 11 × 0 + resto 0</span>
+              </div>
+              <div class="math-step">
+                <span>Resto da Divisão (R₂ = S₂ mod 11):</span>
+                <strong id="dv2RestoVal" style="color:var(--blue);">0</strong>
+              </div>
+              <div class="math-step">
+                <span>Regra do Algoritmo:</span>
+                <span id="dv2RuleText">Se R₂ &lt; 2 ➔ DV₂ = 0; senão ➔ 11 - R₂</span>
+              </div>
+
+              <div class="result-dv-box">
+                <div>
+                  <span style="font-size:0.72rem; text-transform:uppercase; color:#68716c; display:block;">DV₂ Calculado</span>
+                  <span style="font-size:0.78rem;" id="dv2Comparison">Esperado pelo cálculo</span>
+                </div>
+                <span class="result-dv-val" id="dv2FinalVal">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Theory & Pedagogical Tabs -->
+        <div class="theory-card">
+          <div class="theory-tabs" role="tablist">
+            <button type="button" class="theory-tab-btn active" data-tab="tabMath">📐 Fundamento Matemático</button>
+            <button type="button" class="theory-tab-btn" data-tab="tabErrors">🔬 Laboratório de Detecção de Erros</button>
+            <button type="button" class="theory-tab-btn" data-tab="tabRegions">🗺️ Regiões Fiscais (D₉)</button>
+            <button type="button" class="theory-tab-btn" data-tab="tabCode">💻 Implementação em Código</button>
+          </div>
+
+          <!-- Pane 1: Math Foundation -->
+          <div class="theory-pane active" id="tabMath">
+            <h3 style="margin-top:0; font-family:'Fraunces', Georgia, serif; font-size:1.25rem;">Por que a Aritmética Modular em ℤ₁₁ é Tão Eficiente?</h3>
+            <p>
+              O sistema de dígitos verificadores do CPF não é uma mera formalidade de cadastro: é um <strong>código detector de erros linear</strong>.
+              A escolha do número primo <strong>p = 11</strong> é fundamental:
+            </p>
+            <ul>
+              <li>
+                <strong>Corpo Finito 𝔽₁₁:</strong> Como 11 é um número primo, o anel ℤ₁₁ é um <em>corpo</em>. Isso significa que todo número não-nulo entre 1 e 10
+                possui inverso multiplicativo módulo 11 (não há divisores de zero).
+              </li>
+              <li>
+                <strong>Pesos Decrescentes Distintos:</strong> Os pesos $w_i \in \{2, 3, \dots, 11\}$ são todos menores que 11 e, portanto, coprimos com 11:
+                $\gcd(w_i, 11) = 1$.
+              </li>
+              <li>
+                <strong>Detecção de Erro em Dígito Único (100% garantida):</strong> Se um operador digitar um dígito errado $d'_i = d_i + e$ com $e \in \{-9, \dots, 9\} \setminus \{0\}$,
+                a alteração na soma ponderada é $\Delta S = w_i \cdot e$. Como 11 é primo e não divide nem $w_i$ nem $e$, temos:
+                $$w_i \cdot e \not\equiv 0 \pmod{11}.$$
+                O resto da divisão <em>sempre</em> se altera, garantindo 100% de detecção de erros de digitação isolados!
+              </li>
+              <li>
+                <strong>Detecção de Transposição de Dígitos Adjacentes (100% garantida):</strong> Se dois dígitos vizinhos forem trocados ($d_i d_{i+1}$ digitados como $d_{i+1} d_i$),
+                como a diferença entre seus pesos adjacentes é exatamente 1 ($w_i - w_{i+1} = 1$), a variação na soma ponderada é:
+                $$\Delta S = (d_i - d_{i+1}) \cdot 1 \not\equiv 0 \pmod{11} \quad (\text{sempre que } d_i \neq d_{i+1}).$$
+                Portanto, toda troca involuntária de dígitos consecutivos é infalivelmente interceptada.
+              </li>
+            </ul>
+          </div>
+
+          <!-- Pane 2: Error Simulation Lab -->
+          <div class="theory-pane" id="tabErrors">
+            <h3 style="margin-top:0; font-family:'Fraunces', Georgia, serif; font-size:1.25rem;">Laboratório de Sensibilidade a Erros</h3>
+            <p>
+              Experimente em tempo real como o algoritmo reage às falhas humanas mais frequentes ao digitar documentos:
+            </p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin:14px 0;">
+              <button type="button" class="btn" id="btnSimSingleError">⚠️ Simular Erro em 1 Dígito Aleatório</button>
+              <button type="button" class="btn" id="btnSimSwapError">🔄 Simular Transposição de Dígitos Vizinhos</button>
+              <button type="button" class="btn" id="btnRestoreCpf">↩️ Restaurar CPF Válido</button>
+            </div>
+            <div class="error-sim-card" id="errorSimResult" style="display:none;">
+              <h4 class="error-sim-title" id="errorSimTitle">Erro Injetado com Sucesso</h4>
+              <div id="errorSimExplanation" style="font-size:0.83rem; line-height:1.6;"></div>
+            </div>
+          </div>
+
+          <!-- Pane 3: Fiscal Regions -->
+          <div class="theory-pane" id="tabRegions">
+            <h3 style="margin-top:0; font-family:'Fraunces', Georgia, serif; font-size:1.25rem;">O 9º Dígito e a Distribuição Geográfica da Receita Federal</h3>
+            <p>
+              O nono dígito do CPF ($d_9$) indica a <strong>Região Fiscal</strong> da Receita Federal do Brasil onde o documento foi emitido:
+            </p>
+            <div style="overflow-x:auto;">
+              <table class="calc-table" style="text-align:left; font-size:0.8rem;">
+                <thead>
+                  <tr>
+                    <th style="width:70px; text-align:center;">Dígito (D₉)</th>
+                    <th>Estados da Federação (Região Fiscal)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td style="text-align:center; font-weight:700;">1</td><td>Distrito Federal, Goiás, Mato Grosso, Mato Grosso do Sul e Tocantins</td></tr>
+                  <tr><td style="text-align:center; font-weight:700;">2</td><td>Acre, Amapá, Amazonas, Pará, Rondônia e Roraima</td></tr>
+                  <tr><td style="text-align:center; font-weight:700;">3</td><td>Ceará, Maranhão e Piauí</td></tr>
+                  <tr><td style="text-align:center; font-weight:700;">4</td><td>Alagoas, Paraíba, Pernambuco e Rio Grande do Norte</td></tr>
+                  <tr><td style="text-align:center; font-weight:700;">5</td><td>Bahia e Sergipe</td></tr>
+                  <tr><td style="text-align:center; font-weight:700;">6</td><td>Minas Gerais</td></tr>
+                  <tr><td style="text-align:center; font-weight:700;">7</td><td>Espírito Santo e Rio de Janeiro</td></tr>
+                  <tr><td style="text-align:center; font-weight:700;">8</td><td>São Paulo</td></tr>
+                  <tr><td style="text-align:center; font-weight:700;">9</td><td>Paraná e Santa Catarina</td></tr>
+                  <tr><td style="text-align:center; font-weight:700;">0</td><td>Rio Grande do Sul</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Pane 4: Clean Code Reference -->
+          <div class="theory-pane" id="tabCode">
+            <h3 style="margin-top:0; font-family:'Fraunces', Georgia, serif; font-size:1.25rem;">Algoritmo em JavaScript e Python</h3>
+            <p>Exemplo canônico e didático da função de validação de CPF:</p>
+            <pre class="code-box"><code>function validarCPF(cpfStr) {
+  // 1. Remove caracteres de formatação
+  const digits = cpfStr.replace(/\D/g, '').split('').map(Number);
+  if (digits.length !== 11) return false;
+
+  // 2. Rejeita CPFs com todos os dígitos idênticos (ex: 111.111.111-11)
+  if (digits.every(d => d === digits[0])) return false;
+
+  // 3. Cálculo do Primeiro Dígito Verificador (DV1)
+  let s1 = 0;
+  for (let i = 0; i &lt; 9; i++) {
+    s1 += digits[i] * (10 - i); // pesos: 10, 9, 8, ..., 2
+  }
+  const r1 = s1 % 11;
+  const dv1 = r1 &lt; 2 ? 0 : 11 - r1;
+  if (digits[9] !== dv1) return false;
+
+  // 4. Cálculo do Segundo Dígito Verificador (DV2)
+  let s2 = 0;
+  for (let i = 0; i &lt; 10; i++) {
+    s2 += digits[i] * (11 - i); // pesos: 11, 10, 9, ..., 2
+  }
+  const r2 = s2 % 11;
+  const dv2 = r2 &lt; 2 ? 0 : 11 - r2;
+  return digits[10] === dv2;
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div>
+          <span class="dot"></span>
+          Mini-projeto educacional de Aritmética Modular e Códigos de Verificação.
+        </div>
+        <div class="footer-nav">
+          <a href="../index.html" class="nav-link">Cifra de César</a>
+          <span>•</span>
+          <a href="../hill/index.html" class="nav-link">Cifra de Hill (Matrizes ℤ₄₈)</a>
+          <span>•</span>
+          <a href="../material-didatico/roteiro_algebra_criptografia.pdf" target="_blank" class="nav-link">Material Didático (.pdf)</a>
+        </div>
+      </footer>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

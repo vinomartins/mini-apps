@@ -1,0 +1,187 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap');
+
+:root {
+    --bg: #f5f0e8;
+    --ink: #171717;
+    --accent: #f26b38;
+    --muted: #68645e;
+    --border: 3px solid var(--ink);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "DM Mono", monospace;
+}
+
+.container {
+    width: min(1000px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 60px 0 35px;
+}
+
+/* ---------- Cabeçalho ---------- */
+
+.hero {
+    max-width: 700px;
+    margin-bottom: 50px;
+}
+
+.eyebrow {
+    margin: 0 0 15px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+}
+
+h1 {
+    margin: 0;
+    font-family: "Fraunces", serif;
+    font-size: clamp(3.2rem, 8vw, 5.8rem);
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+}
+
+.intro {
+    max-width: 580px;
+    margin: 24px 0 0;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--muted);
+}
+
+/* ---------- Cards ---------- */
+
+.apps {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+}
+
+.app-card {
+    position: relative;
+    display: flex;
+    min-height: 220px;
+    padding: 24px;
+    border: var(--border);
+    background: #fffaf2;
+    color: var(--ink);
+    text-decoration: none;
+    box-shadow: 6px 6px 0 var(--ink);
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.app-card:hover {
+    transform: translate(3px, 3px);
+    box-shadow: 3px 3px 0 var(--ink);
+}
+
+.app-number {
+    position: absolute;
+    top: 18px;
+    right: 20px;
+    font-size: 0.7rem;
+    color: var(--accent);
+}
+
+.app-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: auto;
+}
+
+h2 {
+    margin: 0 0 12px;
+    font-family: "Fraunces", serif;
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: -0.03em;
+}
+
+.app-content p {
+    max-width: 390px;
+    margin: 0 0 20px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.6;
+}
+
+.open {
+    display: inline-block;
+    padding: 7px 10px;
+    border: 2px solid var(--ink);
+    background: var(--accent);
+    color: var(--ink);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+}
+
+.coming-soon {
+    cursor: default;
+    background: transparent;
+    box-shadow: none;
+    border-style: dashed;
+}
+
+.coming-soon:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.coming-soon .open {
+    background: transparent;
+}
+
+/* ---------- Rodapé ---------- */
+
+footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 55px;
+    padding-top: 18px;
+    border-top: 2px solid var(--ink);
+    font-size: 0.65rem;
+    color: var(--muted);
+}
+
+/* ---------- Celular ---------- */
+
+@media (max-width: 700px) {
+    .container {
+        width: min(100% - 28px, 600px);
+        padding-top: 40px;
+    }
+
+    .hero {
+        margin-bottom: 40px;
+    }
+
+    .apps {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .app-card {
+        min-height: 200px;
+        padding: 22px;
+        box-shadow: 5px 5px 0 var(--ink);
+    }
+
+    h2 {
+        font-size: 1.8rem;
+    }
+
+    footer {
+        margin-top: 45px;
+    }
+}

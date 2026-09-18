@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cifra de Hill (ℤ₄₈) | Visualizador Interativo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.3/lib/p5.min.js"></script>
+  </head>
+  <body>
+    <main class="page-shell">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;">
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <a href="/" class="nav-back" style="margin-bottom:0;">← Voltar</a>
+          <span style="color:#a59d8f;">•</span>
+        </div>
+      </div>
+
+      <header>
+        <p class="eyebrow">Criptografia &amp; Álgebra Linear</p>
+        <h1>Cifra de Hill</h1>
+        <p class="intro">
+          Transformação linear no reticulado discreto ℤ₄₈ × ℤ₄₈ com todos os <strong>48 símbolos</strong> da Cifra de César
+          (letras A–Z, espaço, pontuação e números 0–9). Cada par de símbolos forma um vetor bidimensional
+          <strong>p = (p₁, p₂)</strong> multiplicado pela matriz-chave <strong>K</strong> módulo 48.
+        </p>
+      </header>
+
+      <section class="app-card" aria-label="Visualizador interativo da Cifra de Hill">
+        <!-- Canvas visualizer column -->
+        <div class="canvas-column">
+          <div class="canvas-toolbar">
+            <div class="view-tabs" role="tablist" aria-label="Modos de visualização">
+              <button id="tabGeo" class="tab-btn active" type="button" role="tab" aria-selected="true">
+                Plano Vetorial ℤ₄₈²
+              </button>
+              <button id="tabCalc" class="tab-btn" type="button" role="tab" aria-selected="false">
+                Passo a Passo
+              </button>
+              <button id="tabTable" class="tab-btn" type="button" role="tab" aria-selected="false">
+                Tabela de Códigos (48)
+              </button>
+              <button id="tabBoth" class="tab-btn" type="button" role="tab" aria-selected="false">
+                Visão Combinada
+              </button>
+            </div>
+            <div class="canvas-info-chip" id="canvasStatusChip">
+              Bloco ativo: <strong id="activeBlockBadge">—</strong>
+            </div>
+          </div>
+
+          <!-- P5.js Graphic canvas -->
+          <div id="canvas-holder" aria-label="Área gráfica do p5.js"></div>
+
+          <!-- Symbol Code Table Tab View -->
+          <div id="symbolTableHolder" class="symbol-table-holder" style="display:none;" aria-label="Tabela de símbolos e códigos de 0 a 47">
+            <div class="table-toolbar">
+              <div class="table-toolbar-top">
+                <div class="table-legend-pills">
+                  <span class="legend-pill">
+                    <span class="legend-pill-color in"></span>
+                    <span>Entrada (p₁, p₂)</span>
+                  </span>
+                  <span class="legend-pill">
+                    <span class="legend-pill-color out"></span>
+                    <span>Saída (c₁, c₂)</span>
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  id="symSearch"
+                  class="table-search"
+                  placeholder="Buscar símbolo ou código..."
+                  aria-label="Buscar símbolo ou código"
+                />
+              </div>
+              <div class="table-filters">
+                <button type="button" class="filter-btn active" data-filter="all">Todos (48)</button>
+                <button type="button" class="filter-btn" data-filter="letter">Letras A–Z (26)</button>
+                <button type="button" class="filter-btn" data-filter="punct">Pontuação (12)</button>
+                <button type="button" class="filter-btn" data-filter="digit">Dígitos 0–9 (10)</button>
+              </div>
+            </div>
+            <div class="symbol-grid" id="symbolGrid" aria-label="Grade de 48 cartões com códigos dos símbolos">
+              <!-- Dynamically populated symbol cards -->
+            </div>
+            <div class="table-help-note">
+              💡 Dica: Clique em qualquer símbolo da tabela para inseri-lo diretamente na mensagem.
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls and parameters column -->
+        <aside class="controls">
+          <!-- Key Matrix Section -->
+          <div class="control-section">
+            <div class="section-title">
+              <span>Matriz Chave K (2×2 em ℤ₄₈)</span>
+              <small id="detPreview" style="color:var(--orange); font-weight:bold;">det(K) ≡ 1</small>
+            </div>
+
+            <div class="matrix-container">
+              <div class="matrix-bracket">[</div>
+              <div class="matrix-grid">
+                <div class="matrix-cell">
+                  <label for="k00">k₁₁</label>
+                  <input id="k00" type="number" min="0" max="47" value="7" />
+                </div>
+                <div class="matrix-cell">
+                  <label for="k01">k₁₂</label>
+                  <input id="k01" type="number" min="0" max="47" value="4" />
+                </div>
+                <div class="matrix-cell">
+                  <label for="k10">k₂₁</label>
+                  <input id="k10" type="number" min="0" max="47" value="5" />
+                </div>
+                <div class="matrix-cell">
+                  <label for="k11">k₂₂</label>
+                  <input id="k11" type="number" min="0" max="47" value="3" />
+                </div>
+              </div>
+              <div class="matrix-bracket">]</div>
+            </div>
+
+            <div id="matrixStatus" class="matrix-status valid">
+              <strong>✓ Matriz válida e invertível mod 48</strong>
+              <span>det(K) = 1 ≡ 1, mdc(1, 48) = 1. Inverso: 1⁻¹ ≡ 1 (mod 48).</span>
+            </div>
+
+            <div id="matrixMathDetails" class="matrix-math-details">
+              <span>Inversa K⁻¹ = [3, 44; 43, 7]</span>
+            </div>
+
+            <div class="preset-row">
+              <button type="button" class="btn-small" id="preset1">[7,4; 5,3] (det 1)</button>
+              <button type="button" class="btn-small" id="preset2">[5,8; 3,7] (det 11)</button>
+              <button type="button" class="btn-small" id="preset3">[5,2; 7,5] (det 11)</button>
+              <button type="button" class="btn-small" id="preset4">[5,6; 2,5] (det 13)</button>
+              <button type="button" class="btn-small action-btn" id="btnRandomKey">🎲 Nova Chave Válida</button>
+              <button type="button" class="btn-small action-btn" id="btnInvertKey">⇅ Aplicar Inversa K⁻¹</button>
+            </div>
+          </div>
+
+          <!-- Mode switch -->
+          <div class="control-section">
+            <label class="switch-row" for="mode">
+              <input id="mode" type="checkbox" />
+              <span class="switch" aria-hidden="true"></span>
+              <span>
+                <b id="modeName">Cifrar</b>
+                <small id="modeHint">C = K · P (mod 48)</small>
+              </span>
+            </label>
+          </div>
+
+          <!-- Message input -->
+          <div class="control-section">
+            <div class="section-title">
+              <label for="message">Sua Mensagem</label>
+              <small id="charCount">0 símbolos</small>
+            </div>
+            <textarea
+              id="message"
+              maxlength="140"
+              spellcheck="false"
+              placeholder="DIGITE UMA MENSAGEM (LETRAS, NÚMEROS, PONTUAÇÃO, ESPAÇOS)..."
+            >OLA, MUNDO! 1929</textarea>
+
+            <div class="quick-texts">
+              <span>Exemplos:</span>
+              <button type="button" class="btn-small" data-msg="OLA, MUNDO! 1929">OLA, MUNDO! 1929</button>
+              <button type="button" class="btn-small" data-msg="HILL: 1929.">HILL: 1929.</button>
+              <button type="button" class="btn-small" data-msg="ALGEBRA (Z48)">ALGEBRA (Z48)</button>
+              <button type="button" class="btn-small" data-msg="RETRO-CYPHER?">RETRO-CYPHER?</button>
+            </div>
+          </div>
+
+          <!-- Digraph blocks stepper -->
+          <div class="control-section">
+            <div class="block-stepper">
+              <div class="block-stepper-header">
+                <span>Dígrafos (Pares de Símbolos)</span>
+                <small id="paddingNotice" style="color:var(--orange); display:none;">+ 'X' (padding)</small>
+              </div>
+
+              <div class="block-chips" id="blockChips" aria-label="Lista de blocos de 2 símbolos">
+                <!-- Dynamically populated chips -->
+              </div>
+
+              <div class="stepper-controls">
+                <button type="button" id="btnPrevBlock" title="Bloco anterior">◀ Anterior</button>
+                <button type="button" id="btnPlayAnim" title="Animar passo a passo">▶ Animar</button>
+                <button type="button" id="btnNextBlock" title="Próximo bloco">Próximo ▶</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Results -->
+          <div class="result-block">
+            <span class="result-label" id="resultLabel">Mensagem Cifrada</span>
+            <output id="result" aria-live="polite">—</output>
+            <div class="active-block-summary" id="blockSummary">
+              Bloco 1: <strong>OL</strong> (14, 11) ➔ <strong>...</strong>
+            </div>
+            <p class="note">
+              Caracteres permitidos: A–Z, espaço, . , ? ! : ; - ' &quot; ( ) e números 0–9 (Total: 48 símbolos no anel ℤ₄₈).
+            </p>
+          </div>
+        </aside>
+      </section>
+
+      <footer>
+        <div class="footer-left">
+          <span class="dot"></span>
+          A Cifra de Hill em ℤ₄₈ opera com matrizes em anéis modulares com 48 símbolos. O determinante deve ser coprimo com 48: mdc(det, 48) = 1 (isto é, det não pode ser divisível por 2 nem por 3).
+        </div>
+        <div class="footer-links" style="display:flex; gap:10px; align-items:center;">
+          <a href="../cesar-v2/index.html" style="color:var(--orange); text-decoration:underline;">Cifra de César (v2 com Tabela)</a>
+          <span>•</span>
+          <a href="../index.html">César Clássica</a>
+        </div>
+      </footer>
+    </main>
+
+    <script src="sketch.js"></script>
+  </body>
+</html>
